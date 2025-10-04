@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Asset Manager DApp</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-  </head>
-  <body>
-    <h1>Asset Manager DApp</h1>
-    <button id="connect">Connect Wallet</button>
-    <button id="sign">Sign Compliance Message</button>
-    <button id="verify">Verify Signature</button>
-    <button id="attest">Send AML Attestation</button>
-    <button id="transfer">Transfer Funds</button>
+<head>
+  <meta charset="UTF-8" />
+  <title>Asset Manager DApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+</head>
+<body>
+  <h2>Asset Manager DApp</h2>
+  <button id="connect">Connect Wallet</button>
+  <button id="sign">Sign Compliance Message</button>
+  <button id="verify">Verify Signature</button>
+  <button id="attest">Send AML Attestation</button>
+  <button id="transfer">Transfer Funds</button>
 
-    <script>
-      const contractAddress = "0xDFc8AE8F1D127f59292A7eC5deA52DDE0b9FFe91";
-      const abi = [/* paste ABI here */];
-      let provider, signer, userAddress, contract, signature;
+  <script>
+    const contractAddress = "0xDFc8AE8F1D127f59292A7eC5deA52DDE0b9FFe91";
+    const abi = [/* paste your ABI here */];
+    let provider, signer, userAddress, contract, signature;
 
-      const message = `
+    const message = `
 I hereby declare that the funds in my wallet are clean,
 derived from lawful activities, and are not related to
 money laundering, terrorist financing, or any other illicit activity.
@@ -26,37 +26,37 @@ By signing this message, I authorize that forensic analytics
 may be performed on my wallet for AML and compliance purposes.
 `;
 
-      document.getElementById("connect").onclick = async () => {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        userAddress = await signer.getAddress();
-        contract = new ethers.Contract(contractAddress, abi, signer);
-        alert("Wallet connected: " + userAddress);
-      };
+    document.getElementById("connect").onclick = async () => {
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
+      contract = new ethers.Contract(contractAddress, abi, signer);
+      alert("Wallet connected: " + userAddress);
+    };
 
-      document.getElementById("sign").onclick = async () => {
-        signature = await signer.signMessage(message);
-        alert("Signature: " + signature);
-      };
+    document.getElementById("sign").onclick = async () => {
+      signature = await signer.signMessage(message);
+      alert("Signature: " + signature);
+    };
 
-      document.getElementById("verify").onclick = () => {
-        const recovered = ethers.utils.verifyMessage(message, signature);
-        alert(recovered.toLowerCase() === userAddress.toLowerCase() ? "Valid Signature" : "Invalid Signature");
-      };
+    document.getElementById("verify").onclick = () => {
+      const recovered = ethers.utils.verifyMessage(message, signature);
+      alert(recovered.toLowerCase() === userAddress.toLowerCase() ? "Valid Signature" : "Invalid Signature");
+    };
 
-      document.getElementById("attest").onclick = async () => {
-        const reportHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("Al-Amir Market Verified"));
-        await contract.storeAttestation(userAddress, reportHash, "Verified");
-        alert("Attestation sent");
-      };
+    document.getElementById("attest").onclick = async () => {
+      const reportHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("Al-Amir Market Verified"));
+      await contract.storeAttestation(userAddress, reportHash, "Verified");
+      alert("Attestation sent");
+    };
 
-      document.getElementById("transfer").onclick = async () => {
-        const tokenAddress = "0x0000000000000000000000000000000000000001";
-        const amount = ethers.utils.parseEther("1");
-        await contract.transferFunds(tokenAddress, amount);
-        alert("Transfer executed");
-      };
-    </script>
-  </body>
+    document.getElementById("transfer").onclick = async () => {
+      const tokenAddress = "0x0000000000000000000000000000000000000001";
+      const amount = ethers.utils.parseEther("1");
+      await contract.transferFunds(tokenAddress, amount);
+      alert("Transfer executed");
+    };
+  </script>
+</body>
 </html>
