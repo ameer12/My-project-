@@ -2,17 +2,61 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Asset Manager DApp for AML Compliance and Token Transfers" />
     <title>Asset Manager DApp</title>
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <h1>Asset Manager DApp</h1>
+    <button id="connect">Connect Wallet</button>
+    <button id="sign">Sign Compliance Message</button>
+    <button id="verify">Verify Signature</button>
+    <button id="attest">Send AML Attestation</button>
+    <button id="transfer">Transfer Funds</button>
 
-    <!-- Optional: Web3 modal or WalletConnect support -->
-    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@latest/dist/ethers.min.js"></script>
+    <script>
+      const contractAddress = "0xDFc8AE8F1D127f59292A7eC5deA52DDE0b9FFe91";
+      const abi = [/* paste ABI here */];
+      let provider, signer, userAddress, contract, signature;
+
+      const message = `
+I hereby declare that the funds in my wallet are clean,
+derived from lawful activities, and are not related to
+money laundering, terrorist financing, or any other illicit activity.
+By signing this message, I authorize that forensic analytics
+may be performed on my wallet for AML and compliance purposes.
+`;
+
+      document.getElementById("connect").onclick = async () => {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        userAddress = await signer.getAddress();
+        contract = new ethers.Contract(contractAddress, abi, signer);
+        alert("Wallet connected: " + userAddress);
+      };
+
+      document.getElementById("sign").onclick = async () => {
+        signature = await signer.signMessage(message);
+        alert("Signature: " + signature);
+      };
+
+      document.getElementById("verify").onclick = () => {
+        const recovered = ethers.utils.verifyMessage(message, signature);
+        alert(recovered.toLowerCase() === userAddress.toLowerCase() ? "Valid Signature" : "Invalid Signature");
+      };
+
+      document.getElementById("attest").onclick = async () => {
+        const reportHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("Al-Amir Market Verified"));
+        await contract.storeAttestation(userAddress, reportHash, "Verified");
+        alert("Attestation sent");
+      };
+
+      document.getElementById("transfer").onclick = async () => {
+        const tokenAddress = "0x0000000000000000000000000000000000000001";
+        const amount = ethers.utils.parseEther("1");
+        await contract.transferFunds(tokenAddress, amount);
+        alert("Transfer executed");
+      };
+    </script>
   </body>
 </html>
